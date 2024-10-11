@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
-import { TextControl, PanelBody } from '@wordpress/components';
+import { TextControl, PanelBody, ToggleControl } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 
@@ -35,10 +35,14 @@ registerBlockType('ace/login-block', {
             type: 'string',
             default: __('Log In', 'login-block'),
         },
+        showPassword: {
+            type: 'boolean',
+            default: false, // Default is off
+        },
     },
 
     edit: ({ attributes, setAttributes }) => {
-        const { redirectUrl, labelUsername, labelPassword, labelRemember, labelLogIn } = attributes;
+        const { redirectUrl, labelUsername, labelPassword, labelRemember, labelLogIn, showPassword } = attributes;
 
         return (
             <div {...useBlockProps()}>
@@ -70,27 +74,48 @@ registerBlockType('ace/login-block', {
                             value={labelLogIn}
                             onChange={(value) => setAttributes({ labelLogIn: value })}
                         />
+                        <ToggleControl
+                            label={__('Allow users to show password', 'login-block')}
+                            checked={showPassword}
+                            onChange={(value) => setAttributes({ showPassword: value })}
+                        />
                     </PanelBody>
                 </InspectorControls>
 
                 <div className="wp-block-login-form-editor">
-                    <form className="wp-block-login-form">
+                    <form className="wp-block-login-form" action={redirectUrl || 'wp-login.php'} method="post">
                         <p>
                             <label>{labelUsername}</label>
-                            <input type="text" placeholder={__('Username', 'login-block')} disabled />
+                            <input type="text" name="log" placeholder={__('Username', 'login-block')} required />
                         </p>
                         <p>
                             <label>{labelPassword}</label>
-                            <input type="password" id="login-password" placeholder={__('Password', 'login-block')} disabled />
-                            <i className="fa fa-eye" id="togglePassword" style={{ cursor: 'pointer' }}></i>
+                            <input
+                                type={showPassword ? 'text' : 'password'} // Toggle password visibility
+                                name="pwd"
+                                placeholder={__('Password', 'login-block')}
+                                required
+                            />
+                            {showPassword && (
+                                <span
+                                    id="togglePassword"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => {
+                                        const passwordField = document.querySelector('input[name="pwd"]');
+                                        passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+                                    }}
+                                >
+                                    Show Password
+                                </span>
+                            )}
                         </p>
                         <p>
                             <label>
-                                <input type="checkbox" disabled /> {labelRemember}
+                                <input type="checkbox" name="rememberme" /> {labelRemember}
                             </label>
                         </p>
                         <p>
-                            <button type="button" className="button button-primary" disabled>
+                            <button type="submit" className="button button-primary">
                                 {labelLogIn}
                             </button>
                         </p>
@@ -101,24 +126,49 @@ registerBlockType('ace/login-block', {
     },
 
     save: ({ attributes }) => {
-        const { labelUsername, labelPassword, labelRemember, labelLogIn } = attributes;
+        const { redirectUrl, labelUsername, labelPassword, labelRemember, labelLogIn, showPassword } = attributes;
+
+        // Function to get query string parameters
+        const getQueryParameter = (name) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        };
+
+        // Try to grab the 'redirect_to' param from the URL
+        const redirectTo = getQueryParameter('redirect_to') || redirectUrl || '/wp-admin';
 
         return (
             <div className="wp-block-login-form">
-                <form action="/wp-login.php" method="post">
+                <form action={redirectTo} method="post">
                     <p>
                         <label>{labelUsername}</label>
-                        <input type="text" name="log" placeholder={labelUsername} required />
+                        <input type="text" name="log" id="user_login" placeholder={labelUsername} required />
                     </p>
                     <p>
                         <label>{labelPassword}</label>
-                        <input type="password" id="login-password" name="pwd" placeholder={labelPassword} required />
-                        <span id="togglePassword" style={{ cursor: 'pointer' }}>Show Password</span>
+                        <input
+                            type={showPassword ? 'password' : 'text'}
+                            name="pwd"
+                            id="login-password"
+                            placeholder={labelPassword}
+                            required
+                        />
+                        {showPassword && (
+                            <span
+                                id="togglePassword"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                    const passwordInput = document.getElementById('login-password');
+                                    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+                                }}
+                            >
+                                Show Password
+                            </span>
+                        )}
                     </p>
                     <p>
                         <label>
-                            <input type="checkbox" id="show-password" />
-                            {labelRemember}
+                            <input type="checkbox" name="rememberme" /> {labelRemember}
                         </label>
                     </p>
                     <p>
@@ -126,6 +176,8 @@ registerBlockType('ace/login-block', {
                             {labelLogIn}
                         </button>
                     </p>
+                    <input type="hidden" name="redirect_to" value={redirectTo} />
+                    <input type="hidden" name="testcookie" value="1" /> {/* This is to set the test cookie */}
                 </form>
             </div>
         );

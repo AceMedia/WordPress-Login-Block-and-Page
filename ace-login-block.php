@@ -133,6 +133,13 @@ function ace_login_block_login_enqueue_assets() {
         filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.js' ),
         true
     );
+
+
+
+    // Localize script to pass the site URL to JavaScript
+    wp_localize_script( 'ace-login-block-js', 'aceLoginBlock', array(
+        'loginUrl' => site_url('wp-login.php'),
+    ));
 }
 add_action( 'login_enqueue_scripts', 'ace_login_block_login_enqueue_assets' );
 
