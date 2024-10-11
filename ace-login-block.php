@@ -4,7 +4,7 @@
  * Description:       A block to replace the WordPress login page using a custom page and its template from the site editor.
  * Requires at least: 6.6
  * Requires PHP:      7.2
- * Version:           0.7
+ * Version:           0.420.0
  * Author:            Shane Rounce
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html

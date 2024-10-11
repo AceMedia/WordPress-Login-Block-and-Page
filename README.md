@@ -1,68 +1,65 @@
-***Ace Map Block***
+# Ace Login Block
 
-Contributors:      Shane Rounce of AceMedia.ninja 
+**Contributors:** Shane Rounce of AceMedia.ninja  
+**Tags:** login, block, custom login, WordPress, Gutenberg, security  
+**Tested up to:** 6.6  
+**Stable tag:** 1.0.0  
 
-Tags:              block, map, google, street view, places, wordpress, gutenberg
+Customize your WordPress login page with a fully-integrated Gutenberg block, giving you complete control over the design and functionality.
 
-Tested up to:      6.6 
+## Description
 
-Stable tag:        1.0.0 
+Ace Login Block allows you to replace the default WordPress login page with a custom page of your choosing, all designed and managed within the block editor. This lets you create a branded login experience for your users while leveraging the flexibility and ease of Gutenberg.
 
+### Features include:
+- Replace the default WordPress login page with a custom block-based design.
+- Full integration with the block editor, giving you complete control over the login page layout.
+- Allow the default WordPress login functionality for POST requests to ensure smooth login submissions.
+- Customize redirects and add additional fields or branding elements to the login page.
+- Prevent further execution of the default `wp-login.php` after your custom login template loads.
 
-Interactive Google Maps block with Street View and Places Autocomplete, fully integrated within the WordPress block editor.
+Ace Login Block provides a seamless way to craft unique, branded login experiences while ensuring compatibility with WordPress’s login handling.
 
-**Description**
-
-Ace Map Block allows you to embed customizable Google Maps into the WordPress block editor, providing full integration with Google Places Autocomplete, map pins, and Google Street View. It is perfect for creating interactive, location-based content with real-time search, map, and street view features.
-
-**Features include:**
-- Adding fully interactive Google Maps directly inside the block editor.
-- Droppable pins with customizable latitude and longitude.
-- Toggleable Street View with heading and pitch customization.
-- Real-time location search with Google Places Autocomplete.
-- Automatically updates address field from selected place or reverse geocoded map clicks.
-
-Ace Map Block integrates seamlessly into the block editor, allowing users to customize map settings, switch between map and street view, and update the map pin’s location with ease.
-
-**Installation**
+## Installation
 
 This section describes how to install the plugin and get it working.
 
-1. Upload the plugin files to the `/wp-content/plugins/ace-map-block` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/ace-login-block` directory, or install the plugin through the WordPress plugin screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
+3. Navigate to the "Ace Login Block" settings and select the page to use for your custom login page.
 
-**Frequently Asked Questions**
+## Frequently Asked Questions
 
-*How do I add a map to my page?*
+### How do I customize my login page?
 
-Simply add the "Ace Map Block" from the block editor. You can customize the map's location, pin, and toggle Street View using the block inspector.
+Once the plugin is activated, go to the "Ace Login Block" settings in your WordPress dashboard and select the page you want to use as your custom login page. You can then use the block editor to design the page.
 
-*Can I search for places on the map?*
+### Will WordPress still handle logins?
 
-Yes, the plugin integrates Google Places Autocomplete, allowing you to search for locations in real-time. The map will automatically update based on your selected place.
+Yes, WordPress will continue to handle all login submissions via POST requests, ensuring that authentication continues to work normally. Ace Login Block simply replaces the display of the login page with your custom page design for GET requests.
 
-*How does Street View work?*
+### Can I add custom fields to my login page?
 
-You can toggle between map view and Street View using the "Is Street View?" toggle in the block inspector. Alternatively, you can drop the yellow man on the map to switch to Street View directly.
+Yes, you can add custom blocks, text, images, or any other elements within the block editor to fully customize the layout of your login page.
 
-*Does the address field update automatically?*
+### What happens if I disable the plugin?
 
-Yes, the address field is automatically updated based on either the selected Places result or the location clicked on the map (using reverse geocoding).
+If you disable Ace Login Block, WordPress will revert to the default `wp-login.php` page for login access.
 
-**Screenshots**
+## Screenshots
 
-1. Block editor interface with Ace Map Block and inspector settings.
-2. Example of map and pin added to a post or page with Street View enabled.
+1. **Custom login page** built using Ace Login Block in the block editor.
+2. Example of branded login page after replacing the default WordPress login page.
 
-**Changelog**
+## Changelog
 
-*0.420*
-* Initial release of Ace Map Block.
-* Integrated Google Maps block with customizable pins and real-time location search.
-* Support for Google Street View with heading and pitch customization.
-* Places Autocomplete integration for location search.
-* Automatic address updates using Places or reverse geocoding.
+### 1.0.0
+- Initial release of Ace Login Block.
+- Replace default WordPress login page with a custom page created in the block editor.
+- Full block editor support for designing custom login pages.
+- Ensure POST requests for login are still handled by WordPress.
+- Support for custom login redirects.
 
-**Advanced use**
+## Advanced Use
 
-For advanced users, Ace Map Block includes reverse geocoding and manual pin dropping to update map locations dynamically within the editor. Perfect for location-based websites that need customizable map and Street View integration directly in WordPress.
+Ace Login Block is perfect for developers and site owners looking to create unique, branded login experiences. By leveraging the block editor, you can design your login page however you see fit, from adding custom fields to embedding brand logos or messages. The plugin ensures that login functionality remains intact while offering flexibility over the appearance and content of the login page.
