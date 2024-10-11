@@ -21,7 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers the block and its settings.
  */
 function create_block_ace_login_block_init() {
-    register_block_type( __DIR__ . '/build' );
+    register_block_type( __DIR__ . '/build/login-block' );
+    register_block_type( __DIR__ . '/build/username-block' );
+    register_block_type( __DIR__ . '/build/password-block' );
 }
 add_action( 'init', 'create_block_ace_login_block_init' );
 
@@ -70,8 +72,6 @@ function ace_login_block_custom_page_field_html() {
 function ace_login_block_load_custom_page_template() {
     $custom_page_id = get_option( 'ace_login_block_custom_page' );
 
-
-
     // Check if we're on wp-login.php and a custom page is set
     if ( strpos( $_SERVER['REQUEST_URI'], 'wp-login.php' ) !== false && $custom_page_id ) {
         
@@ -79,7 +79,6 @@ function ace_login_block_load_custom_page_template() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return; // Let WordPress handle the login submission
         }
-
 
         // Fetch the template for the chosen page
         $page_template = get_page_template_slug( $custom_page_id );
@@ -90,7 +89,6 @@ function ace_login_block_load_custom_page_template() {
         } else {
             $template_path = get_page_template();
         }
-
 
         if ( ! empty( $template_path ) ) {
             // Set up the global post data for the custom page
@@ -109,8 +107,6 @@ function ace_login_block_load_custom_page_template() {
     }
 }
 add_action( 'login_init', 'ace_login_block_load_custom_page_template' );
-
-
 
 /**
  * Enqueue styles and scripts for the custom login page.
@@ -134,8 +130,6 @@ function ace_login_block_login_enqueue_assets() {
         true
     );
 
-
-
     // Localize script to pass the site URL to JavaScript
     wp_localize_script( 'ace-login-block-js', 'aceLoginBlock', array(
         'loginUrl' => site_url('wp-login.php'),
@@ -151,14 +145,158 @@ function ace_login_block_login_title( $title ) {
 }
 add_filter( 'login_title', 'ace_login_block_login_title' );
 
-
+/**
+ * Enqueue assets for the blocks.
+ */
 function ace_login_block_enqueue_assets() {
-        wp_enqueue_script(
-            'ace-login-toggle',
-            plugin_dir_url( __FILE__ ) . 'build/ace-login-toggle.js',
-            array(),
-            '1.0.0',
-            true
-        );
+    wp_enqueue_script(
+        'ace-login-toggle',
+        plugin_dir_url( __FILE__ ) . 'build/login-toggle.js',
+        array(),
+        '1.0.0',
+        true
+    );
+
+    wp_enqueue_script(
+        'ace-login-block-editor',
+        plugin_dir_url( __FILE__ ) . 'build/login-block.js',
+        array( 'wp-blocks', 'wp-element', 'wp-editor' ),
+        filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.js' ),
+        true
+    );
+
+    wp_enqueue_script(
+        'ace-username-block-editor',
+        plugin_dir_url( __FILE__ ) . 'build/username-block.js',
+        array( 'wp-blocks', 'wp-element', 'wp-editor' ),
+        filemtime( plugin_dir_path( __FILE__ ) . 'build/username-block.js' ),
+        true
+    );
+
+    wp_enqueue_script(
+        'ace-password-block-editor',
+        plugin_dir_url( __FILE__ ) . 'build/password-block.js',
+        array( 'wp-blocks', 'wp-element', 'wp-editor' ),
+        filemtime( plugin_dir_path( __FILE__ ) . 'build/password-block.js' ),
+        true
+    );
+
+    wp_enqueue_script(
+        'ace-remember-me-block-editor',
+        plugin_dir_url( __FILE__ ) . 'build/remember-me-block.js',
+        array( 'wp-blocks', 'wp-element', 'wp-editor' ),
+        filemtime( plugin_dir_path( __FILE__ ) . 'build/remember-me-block.js' ),
+        true
+    );
+
+    wp_enqueue_style(
+        'ace-login-block-editor-style',
+        plugin_dir_url( __FILE__ ) . 'build/login-block.css',
+        array(),
+        filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.css' )
+    );
 }
-add_action( 'init', 'ace_login_block_enqueue_assets' );
+add_action( 'enqueue_block_editor_assets', 'ace_login_block_enqueue_assets' );
+
+/**
+ * Registers the Ace Username Block.
+ */
+function register_username_block() {
+    register_block_type('ace/username-block', array(
+        'render_callback' => 'render_username_block',
+        'attributes' => array(
+            'label' => array(
+                'type' => 'string',
+                'default' => __('Username', 'login-block'),
+            ),
+        ),
+    ));
+}
+add_action('init', 'register_username_block');
+
+/**
+ * Renders the Ace Username Block.
+ */
+function render_username_block($attributes) {
+    return '<input type="text" id="log" name="log" placeholder="' . $label . '" required />';
+}
+
+/**
+ * Registers the Ace Password Block.
+ */
+function register_password_block() {
+    register_block_type('ace/password-block', array(
+        'render_callback' => 'render_password_block',
+        'attributes' => array(
+            'label' => array(
+                'type' => 'string',
+                'default' => __('Password', 'login-block'),
+            ),
+            'showPassword' => array(
+                'type' => 'boolean',
+                'default' => false,
+            ),
+        ),
+    ));
+}
+add_action('init', 'register_password_block');
+
+/**
+ * Renders the Ace Password Block.
+ */
+function render_password_block($attributes) {
+    $show_password = $attributes['showPassword'] ? 'true' : 'false';
+    
+    $html = '<input type="password" id="pwd" name="pwd" placeholder="" required />';
+    
+    if ($attributes['showPassword']) {
+        $html .= '<span style="cursor:pointer" data-show-password="' . $show_password . '">' . __('Show Password', 'login-block') . '</span>';
+    }
+    
+    $html .= '</p>';
+    
+    return $html;
+}
+
+
+
+/**
+ * Registers the Ace Remember Me Block.
+ */
+function register_remember_me_block() {
+    register_block_type('ace/remember-me-block', array(
+        'render_callback' => 'render_remember_me_block',
+        'attributes' => array(
+            'label' => array(
+                'type' => 'string',
+                'default' => __('Remember Me', 'login-block'),
+            ),
+            'checked' => array(
+                'type' => 'boolean',
+                'default' => false,
+            ),
+        ),
+    ));
+}
+add_action('init', 'register_remember_me_block');
+
+/**
+ * Renders the Ace Remember Me Block.
+ */
+function render_remember_me_block($attributes) {
+    $label = esc_html($attributes['label']);
+    $checked = $attributes['checked'] ? 'checked' : '';
+    return '<p><label><input type="checkbox" name="rememberme" ' . $checked . ' /> ' . $label . '</label></p>';
+}
+
+
+function ace_login_block_enqueue_scripts() {
+    wp_enqueue_script(
+        'toggle-password',
+        plugins_url('build/login-toggle.js', __FILE__),
+        array(),
+        '1.0.0',
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'ace_login_block_enqueue_scripts');
