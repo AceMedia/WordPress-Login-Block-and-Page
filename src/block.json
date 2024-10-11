@@ -13,6 +13,7 @@
 	},
 	"textdomain": "ace-login-block",
 	"editorScript": "file:./login-block.js",
+	"script": "file:./ace-login-toggle.js",
 	"editorStyle": "file:./login-block.css",
 	"style": "file:./login-block.css"
 }

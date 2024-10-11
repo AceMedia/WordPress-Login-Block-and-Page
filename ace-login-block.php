@@ -146,7 +146,6 @@ add_filter( 'login_title', 'ace_login_block_login_title' );
 
 
 function ace_login_block_enqueue_assets() {
-    if ( is_page() || is_singular() ) {
         wp_enqueue_script(
             'ace-login-toggle',
             plugin_dir_url( __FILE__ ) . 'build/ace-login-toggle.js',
@@ -154,6 +153,5 @@ function ace_login_block_enqueue_assets() {
             '1.0.0',
             true
         );
-    }
 }
-add_action( 'wp_enqueue_scripts', 'ace_login_block_enqueue_assets' );
+add_action( 'init', 'ace_login_block_enqueue_assets' );

@@ -1,14 +1,16 @@
-// ace-login-toggle.js
 document.addEventListener('DOMContentLoaded', function() {
-    const togglePassword = document.querySelector('#ace-show-password');
-    const passwordInput = document.querySelector('#ace-login-password');
+    const toggleText = document.getElementById('togglePassword');
+    let password = document.getElementById('login-password');
 
-    if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('change', function() {
-            if (togglePassword.checked) {
-                passwordInput.type = 'text';
+    if (toggleText && password) { // Check if elements exist
+        /* Event fired when the element is clicked */
+        toggleText.addEventListener('click', function() {
+            if (password.type === "password") {
+                password.type = "text";
+                toggleText.textContent = "Hide Password";
             } else {
-                passwordInput.type = 'password';
+                password.type = "password";
+                toggleText.textContent = "Show Password";
             }
         });
     }
