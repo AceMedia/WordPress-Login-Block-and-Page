@@ -1,8 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { TextControl, ToggleControl, PanelBody } from '@wordpress/components';
+import { TextControl, PanelBody } from '@wordpress/components';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-
 
 registerBlockType("ace/username-block", {
     title: __("Username Block", "login-block"),
@@ -11,17 +10,32 @@ registerBlockType("ace/username-block", {
         label: {
             type: "string",
             default: __("Username", "login-block")
+        },
+        placeholder: {
+            type: "string",
+            default: __("Username", "login-block")
         }
     },
     edit: function (props) {
-        var label = props.attributes.label;
+        const { attributes, setAttributes } = props;
+        const { label, placeholder } = attributes;
+
         return (
             <div {...useBlockProps()}>
+                <InspectorControls>
+                    <PanelBody title={__("Username Block Settings", "login-block")}>
+                        <TextControl
+                            label={__("Placeholder", "login-block")}
+                            value={placeholder}
+                            onChange={(value) => setAttributes({ placeholder: value })}
+                        />
+                    </PanelBody>
+                </InspectorControls>
                 <TextControl
                     type="text"
-                    name="log"
-                    placeholder={__("Username", "login-block")}
-                    required={true}
+                    placeholder={placeholder}
+                    value={placeholder}
+                    onChange={(value) => setAttributes({ placeholder: value })} // Update placeholder attribute on change
                 />
             </div>
         );

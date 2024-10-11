@@ -34,7 +34,7 @@ registerBlockType('ace/login-block', {
 
         // Template for inner blocks
         const TEMPLATE = [
-            ['core/columns', {}, [
+            ['core/columns', { style: { spacing: { margin: '0px' } } }, [
                 ['core/column', {}, [
                     ['core/paragraph', { content: __('<label for="log"><strong>Username:</strong></label>', 'login-block'), align: 'right' }],
                 ]],
@@ -42,7 +42,7 @@ registerBlockType('ace/login-block', {
                     ['ace/username-block'],
                 ]],
             ]],
-            ['core/columns', {}, [
+            ['core/columns', { style: { spacing: { margin: '0px' } } }, [
                 ['core/column', {}, [
                     ['core/paragraph', { content: __('<label for="pwd"><strong>Password:</strong></label>', 'login-block'), align: 'right' }],
                 ]],
@@ -50,15 +50,18 @@ registerBlockType('ace/login-block', {
                     ['ace/password-block'],
                 ]],
             ]],
-            ['core/columns', {}, [
+            ['core/columns', { style: { spacing: { margin: '0px' } } }, [
                 ['core/column', {}, [
                 ]],
                 ['core/column', {}, [
                     ['ace/remember-me-block', { label: labelRemember }],
-                    ['core/button', {
-                        text: labelLogIn,
-                        className: 'button',
-                    }]
+                    ['core/buttons', {}, [
+                        ['core/button', {
+                            text: labelLogIn,
+                            className: 'button',
+                            ...attributes
+                        }]
+                    ]]
                 ]],
             ]],
         ];

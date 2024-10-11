@@ -114,13 +114,14 @@ add_action( 'login_init', 'ace_login_block_load_custom_page_template' );
 function ace_login_block_login_enqueue_assets() {
     // Ensure scripts are using the WordPress Address (URL)
     $wp_address = get_bloginfo('wpurl');
-
-    wp_enqueue_style(
-        'ace-login-block-style',
-        $wp_address . '/wp-content/plugins/ace-login-block/build/login-block.css',
-        array(),
-        filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.css' )
-    );
+    /*
+        wp_enqueue_style(
+            'ace-login-block-style',
+            $wp_address . '/wp-content/plugins/ace-login-block/build/login-block.css',
+            array(),
+            filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.css' )
+        );
+    */
 
     wp_enqueue_script(
         'ace-login-block-js',
@@ -188,24 +189,26 @@ function ace_login_block_enqueue_assets() {
         filemtime( plugin_dir_path( __FILE__ ) . 'build/remember-me-block.js' ),
         true
     );
-
+/*
     wp_enqueue_style(
         'ace-login-block-editor-style',
         plugin_dir_url( __FILE__ ) . 'build/login-block.css',
         array(),
         filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.css' )
     );
+    */
 }
 add_action( 'enqueue_block_editor_assets', 'ace_login_block_enqueue_assets' );
 
-/**
- * Registers the Ace Username Block.
- */
 function register_username_block() {
     register_block_type('ace/username-block', array(
         'render_callback' => 'render_username_block',
         'attributes' => array(
             'label' => array(
+                'type' => 'string',
+                'default' => __('Username', 'login-block'),
+            ),
+            'placeholder' => array(
                 'type' => 'string',
                 'default' => __('Username', 'login-block'),
             ),
@@ -218,7 +221,9 @@ add_action('init', 'register_username_block');
  * Renders the Ace Username Block.
  */
 function render_username_block($attributes) {
-    return '<input type="text" id="log" name="log" placeholder="' . $label . '" required />';
+    $placeholder = isset($attributes['placeholder']) ? esc_html($attributes['placeholder']) : __('Username', 'login-block');
+    
+    return '<input type="text" id="log" name="log" placeholder="' . $placeholder . '" required />';
 }
 
 /**
@@ -246,15 +251,15 @@ add_action('init', 'register_password_block');
  */
 function render_password_block($attributes) {
     $show_password = $attributes['showPassword'] ? 'true' : 'false';
+    $placeholder = isset($attributes['placeholder']) ? esc_html($attributes['placeholder']) : __('Password', 'login-block');
     
-    $html = '<input type="password" id="pwd" name="pwd" placeholder="" required />';
+    
+    $html = '<input type="password" id="pwd" name="pwd" placeholder="' . $placeholder . '" required />';
     
     if ($attributes['showPassword']) {
         $html .= '<span style="cursor:pointer" data-show-password="' . $show_password . '">' . __('Show Password', 'login-block') . '</span>';
     }
-    
-    $html .= '</p>';
-    
+        
     return $html;
 }
 

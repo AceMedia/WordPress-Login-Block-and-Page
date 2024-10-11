@@ -7,17 +7,17 @@ registerBlockType('ace/password-block', {
     title: __('Password Block', 'login-block'),
     category: 'common',
     attributes: {
-        label: {
-            type: 'string',
-            default: __('Password', 'login-block'),
-        },
         showPassword: {
             type: 'boolean',
             default: false,
         },
+        placeholder: {
+            type: 'string',
+            default: __('Password', 'login-block'),
+        }
     },
     edit: ({ attributes, setAttributes }) => {
-        const { label, showPassword } = attributes;
+        const { showPassword, placeholder } = attributes;
 
         return (
             <div {...useBlockProps()}>
@@ -28,21 +28,24 @@ registerBlockType('ace/password-block', {
                             checked={showPassword}
                             onChange={(value) => setAttributes({ showPassword: value })}
                         />
+                        <TextControl
+                            label={__('Placeholder', 'login-block')}
+                            value={placeholder}
+                            onChange={(value) => setAttributes({ placeholder: value })}
+                        />
                     </PanelBody>
                 </InspectorControls>
                 <TextControl
-                    type="password" // Always show as password in the editor
-                    name="pwd"
-                    placeholder={__('Password', 'login-block')}
-                    required
+                    type="text" // Always show as password in the editor
+                    placeholder={placeholder}
+                    value={placeholder}
+                    onChange={(value) => setAttributes({ placeholder: value })} // Update placeholder attribute on change
                 />
                 {showPassword && (
                     <span
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', fontSize: '0.8em', display: 'block', marginTop: '0.5em' }}
                         onClick={() => setAttributes({ showPassword: !showPassword })}
-                    >
-                        {showPassword ? __('Hide Password', 'login-block') : __('Show Password', 'login-block')}
-                    </span>
+                    >{showPassword ? __('Hide Password', 'login-block') : __('Show Password', 'login-block')}</span>
                 )}
             </div>
         );
