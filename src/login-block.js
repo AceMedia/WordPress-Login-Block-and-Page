@@ -147,7 +147,7 @@ registerBlockType('ace/login-block', {
                     <p>
                         <label>{labelPassword}</label>
                         <input
-                            type={showPassword ? 'password' : 'text'}
+                            type="password"
                             name="pwd"
                             id="login-password"
                             placeholder={labelPassword}
