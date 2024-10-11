@@ -1,17 +1,17 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "create-block/ace-map-block",
-	"version": "0.1.0",
-	"title": "Ace Map Block",
+	"name": "create-block/ace-login-block",
+	"version": "0.421.0",
+	"title": "Ace Login Block",
 	"category": "widgets",
-	"icon": "smiley",
-	"description": "Example block scaffolded with Create Block tool.",
+	"icon": "lock",  
+	"description": "Custom login block for WordPress with username, password, and a show/hide password feature.",
 	"example": {},
 	"supports": {
 		"html": false
 	},
-	"textdomain": "ace-map-block",
+	"textdomain": "ace-login-block",
 	"editorScript": "file:./login-block.js",
 	"editorStyle": "file:./login-block.css",
 	"style": "file:./login-block.css"

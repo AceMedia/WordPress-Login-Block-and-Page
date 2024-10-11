@@ -100,42 +100,34 @@ registerBlockType( 'ace/login-block', {
     },
 
     save: ( { attributes } ) => {
-        const { redirectUrl, labelUsername, labelPassword, labelRemember, labelLogIn } = attributes;
-    
-        // Function to get query string parameters
-        const getQueryParameter = (name) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        };
-    
-        // Try to grab the 'redirect_to' param from the URL
-        const redirectTo = redirectUrl || getQueryParameter('redirect_to') || '/wp-admin'; // Default to wp-admin if no redirect URL is set
+        const { labelUsername, labelPassword, labelRemember, labelLogIn } = attributes;
     
         return (
-            <div { ...useBlockProps.save() }>
-                <form name="loginform" id="loginform" className="wp-block-ace-login-form" action="/core/wp-login.php" method="post">
+            <div className="wp-block-ace-login-form">
+                <form action="/wp-login.php" method="post">
                     <p>
-                        <label htmlFor="user_login">{ labelUsername }</label>
-                        <input type="text" name="log" id="user_login" className="input" autocapitalize="none" autocomplete="username" required />
+                        <label>{ labelUsername }</label>
+                        <input type="text" name="log" placeholder={ labelUsername } required />
                     </p>
-                    <div className="user-pass-wrap">
-                        <label htmlFor="user_pass">{ labelPassword }</label>
-                        <div className="wp-pwd">
-                            <input type="password" name="pwd" id="user_pass" className="input password-input" autocomplete="current-password" spellCheck="false" required />
-                            <button type="button" className="button button-secondary wp-hide-pw hide-if-no-js" data-toggle="0" aria-label="Show password">
-                                <span className="dashicons dashicons-visibility" aria-hidden="true"></span>
-                            </button>
-                        </div>
-                    </div>
-                    <p className="forgetmenot">
-                        <input name="rememberme" type="checkbox" id="rememberme" value="forever" /> <label htmlFor="rememberme">{ labelRemember }</label>
+                    <p>
+                        <label>{ labelPassword }</label>
+                        <input type="password" id="ace-login-password" name="pwd" placeholder={ labelPassword } required />
                     </p>
-                    <p className="submit">
-                        <button type="submit" name="wp-submit" id="wp-submit" className="button button-primary button-large">
+                    <p>
+                        <label>
+                            <input type="checkbox" id="ace-show-password" />
+                            { __( 'Show Password', 'login-block' ) }
+                        </label>
+                    </p>
+                    <p>
+                        <label>
+                            <input type="checkbox" name="rememberme" value="forever" /> { labelRemember }
+                        </label>
+                    </p>
+                    <p>
+                        <button type="submit" className="button button-primary">
                             { labelLogIn }
                         </button>
-                        <input type="hidden" name="redirect_to" value={ redirectTo } />
-                        <input type="hidden" name="testcookie" value="1" />
                     </p>
                 </form>
             </div>

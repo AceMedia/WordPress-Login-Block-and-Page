@@ -128,9 +128,9 @@ function ace_login_block_login_enqueue_assets() {
 
     wp_enqueue_script(
         'ace-login-block-js',
-        $wp_address . '/wp-content/plugins/ace-login-block/build/index.js',
+        $wp_address . '/wp-content/plugins/ace-login-block/build/login-block.js',
         array( 'wp-blocks', 'wp-element', 'wp-editor' ),
-        filemtime( plugin_dir_path( __FILE__ ) . 'build/index.js' ),
+        filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.js' ),
         true
     );
 }
@@ -143,3 +143,17 @@ function ace_login_block_login_title( $title ) {
     return __( 'Login', 'ace-login-block' );
 }
 add_filter( 'login_title', 'ace_login_block_login_title' );
+
+
+function ace_login_block_enqueue_assets() {
+    if ( is_page() || is_singular() ) {
+        wp_enqueue_script(
+            'ace-login-toggle',
+            plugin_dir_url( __FILE__ ) . 'build/ace-login-toggle.js',
+            array(),
+            '1.0.0',
+            true
+        );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'ace_login_block_enqueue_assets' );
