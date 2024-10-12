@@ -72,6 +72,8 @@ function ace_login_block_custom_page_field_html() {
 function ace_login_block_load_custom_page_template() {
     $custom_page_id = get_option( 'ace_login_block_custom_page' );
 
+
+
     // Check if we're on wp-login.php and a custom page is set
     if ( strpos( $_SERVER['REQUEST_URI'], 'wp-login.php' ) !== false && $custom_page_id ) {
         
@@ -125,18 +127,53 @@ function ace_login_block_login_enqueue_assets() {
 
     wp_enqueue_script(
         'ace-login-block-js',
-        $wp_address . '/wp-content/plugins/ace-login-block/build/login-block.js',
+        plugin_dir_url( __FILE__ ) . 'build/login-toggle.js',
         array( 'wp-blocks', 'wp-element', 'wp-editor' ),
-        filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.js' ),
+        filemtime( plugin_dir_url( __FILE__ ) . 'build/login-toggle.js' ),
         true
     );
 
-    // Localize script to pass the site URL to JavaScript
-    wp_localize_script( 'ace-login-block-js', 'aceLoginBlock', array(
+    // Localize script to pass the site URL and nonce to JavaScript
+    wp_localize_script('ace-login-block-js', 'aceLoginBlock', array(
         'loginUrl' => site_url('wp-login.php'),
+        'redirectUrl' => site_url('/wp-admin'),
+        'loginNonce' => wp_create_nonce('login_nonce')
     ));
 }
-add_action( 'login_enqueue_scripts', 'ace_login_block_login_enqueue_assets' );
+add_action( 'wp_enqueue_scripts', 'ace_login_block_login_enqueue_assets' );
+
+
+
+add_action('wp_login', 'custom_login_redirect', 10, 2);
+function custom_login_redirect($user_login, $user) {
+    if (isset($_POST['redirect_to']) && !empty($_POST['redirect_to'])) {
+        wp_safe_redirect($_POST['redirect_to']);
+        exit();
+    }
+}
+
+add_action('wp_logout', 'custom_logout_redirect');
+function custom_logout_redirect() {
+    $redirect_url = home_url(); // Change this to your desired logout redirect URL
+    wp_safe_redirect($redirect_url);
+    exit();
+}
+
+add_action('init', 'custom_handle_logout');
+function custom_handle_logout() {
+    if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+        // Verify the nonce
+        if (isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'log-out')) {
+            // Perform the logout
+            wp_logout();
+
+            // Redirect to the desired URL after logout
+            $redirect_url = home_url(); // Change this to your desired logout redirect URL
+            wp_safe_redirect($redirect_url);
+            exit();
+        }
+    }
+}
 
 /**
  * Customize the login page title.
@@ -165,6 +202,13 @@ function ace_login_block_enqueue_assets() {
         filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.js' ),
         true
     );
+
+    // Localize script to pass the site URL and nonce to JavaScript
+    wp_localize_script('ace-login-block-editor', 'aceLoginBlock', array(
+        'loginUrl' => site_url('wp-login.php'),
+        'redirectUrl' => site_url('/wp-admin'),
+        'loginNonce' => wp_create_nonce('login_nonce')
+    ));
 
     wp_enqueue_script(
         'ace-username-block-editor',
@@ -197,6 +241,8 @@ function ace_login_block_enqueue_assets() {
         filemtime( plugin_dir_path( __FILE__ ) . 'build/login-block.css' )
     );
     */
+
+
 }
 add_action( 'enqueue_block_editor_assets', 'ace_login_block_enqueue_assets' );
 
@@ -294,14 +340,3 @@ function render_remember_me_block($attributes) {
     return '<p><label><input type="checkbox" name="rememberme" ' . $checked . ' /> ' . $label . '</label></p>';
 }
 
-
-function ace_login_block_enqueue_scripts() {
-    wp_enqueue_script(
-        'toggle-password',
-        plugins_url('build/login-toggle.js', __FILE__),
-        array(),
-        '1.0.0',
-        true
-    );
-}
-add_action('wp_enqueue_scripts', 'ace_login_block_enqueue_scripts');

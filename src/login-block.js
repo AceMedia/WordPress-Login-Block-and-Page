@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import { TextControl, PanelBody, ToggleControl } from '@wordpress/components';
+import { TextControl, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 
@@ -30,7 +30,7 @@ registerBlockType('ace/login-block', {
     },
 
     edit: ({ attributes, setAttributes }) => {
-        const { redirectUrl, labelRemember, labelLogIn, showPassword } = attributes;
+        const { redirectUrl, labelRemember, labelLogIn } = attributes;
 
         // Template for inner blocks
         const TEMPLATE = [
@@ -79,7 +79,7 @@ registerBlockType('ace/login-block', {
                     </PanelBody>
                 </InspectorControls>
 
-                <form className="wp-block-login-form" action={redirectUrl || 'wp-login.php'} method="post">
+                <form className="wp-block-login-form" method="post">
                     <InnerBlocks template={TEMPLATE} templateLock="all" />
                 </form>
             </div>
@@ -88,11 +88,13 @@ registerBlockType('ace/login-block', {
 
     save: ({ attributes }) => {
         const { redirectUrl } = attributes;
+        const defaultRedirectUrl = redirectUrl || '/wp-admin';
 
         return (
             <div className="wp-block-login-form">
-                <form action={redirectUrl || 'wp-login.php'} method="post">
+                <form action={aceLoginBlock.loginUrl} method="post">
                     <InnerBlocks.Content />
+                    <input type="hidden" name="redirect_to" value={defaultRedirectUrl} />
                 </form>
             </div>
         );
