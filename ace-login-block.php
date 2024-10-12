@@ -4,7 +4,7 @@
  * Description:       A block to replace the WordPress login page using a custom page and its template from the site editor.
  * Requires at least: 6.6
  * Requires PHP:      7.2
- * Version:           0.422.0
+ * Version:           0.423.0
  * Author:            Shane Rounce
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -28,28 +28,191 @@ function create_block_ace_login_block_init() {
 add_action( 'init', 'create_block_ace_login_block_init' );
 
 /**
- * Register the custom login page setting in the General Settings section.
+ * Register the custom login page setting and create the settings page.
  */
 function ace_login_block_register_settings() {
-    register_setting( 'general', 'ace_login_block_custom_page', [
+    // Register the custom login page setting
+    register_setting( 'ace_login_block_options_group', 'ace_login_block_custom_page', [
         'type' => 'integer',
         'description' => __( 'Custom page for login', 'ace-login-block' ),
         'sanitize_callback' => 'absint',
         'default' => 0,
     ] );
 
-    // Add the setting field to the General Settings page
-    add_settings_field(
-        'ace_login_block_custom_page',
-        __( 'Custom Login Page', 'ace-login-block' ),
-        'ace_login_block_custom_page_field_html',
-        'general'
+    // Register settings for redirect URLs
+    $roles = wp_roles()->roles; // Get all WordPress roles
+    foreach ( $roles as $role => $details ) {
+        register_setting( 'ace_login_block_options_group', "ace_login_block_redirect_{$role}", [
+            'type' => 'string',
+            'description' => __( "Redirect URL for {$role}", 'ace-login-block' ),
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => '',
+        ] );
+    }
+
+    // Add the settings page
+    add_options_page(
+        __( 'Login Settings', 'ace-login-block' ),
+        __( 'Login Block', 'ace-login-block' ),
+        'manage_options',
+        'ace-login-block',
+        'ace_login_block_render_settings_page'
     );
 }
-add_action( 'admin_init', 'ace_login_block_register_settings' );
+add_action( 'admin_menu', 'ace_login_block_register_settings' );
+
+// Global array to store admin pages
+global $ace_admin_pages;
+$ace_admin_pages = [];
+
+// Function to clean title by removing <span> tags and their content
+function remove_spans_and_content($title) {
+    // Remove <span> tags and their content
+    $cleaned_title = preg_replace('/<span[^>]*>.*?<\/span>/i', '', $title);
+    $cleaned_title = strip_tags($cleaned_title);
+    
+    // Trim the title to remove any leading/trailing whitespace
+    return trim($cleaned_title);
+}
+
+// In the capture function
+function ace_capture_admin_pages() {
+    global $ace_admin_pages;
+
+    // Use the current menu items
+    global $menu, $submenu;
+
+    // Iterate over the top-level menu
+    foreach ($menu as $menu_item) {
+        // Get the menu slug
+        $slug = isset($menu_item[2]) ? $menu_item[2] : '';
+
+        // Add to the admin pages array if it has a capability and a title
+        if (!empty($slug) && isset($menu_item[0]) && isset($menu_item[1])) {
+            $title = remove_spans_and_content($menu_item[0]); // Remove <span> tags and their content
+            
+            // Debug: Log the title
+            error_log('Top-level Menu Title: ' . $title);
+
+            // Only add if title doesn't contain "separator" followed by any digits
+            if (!preg_match('/separator/i', trim($slug))) { // Use preg_match for regex check
+                $ace_admin_pages[$slug] = [
+                    'title' => $title,
+                    'capability' => $menu_item[1],
+                ];
+            }
+        }
+    }
+
+    // Iterate over submenus to capture additional pages
+    foreach ($submenu as $parent_slug => $sub_menu) {
+        foreach ($sub_menu as $sub_menu_item) {
+            // Add sub-menu items
+            $slug = isset($sub_menu_item[2]) ? $sub_menu_item[2] : '';
+            if (!empty($slug) && isset($sub_menu_item[0]) && isset($sub_menu_item[1])) {
+                $title = remove_spans_and_content($sub_menu_item[0]); // Remove <span> tags and their content
+
+                // Debug: Log the title
+                error_log('Sub-menu Title: ' . $title);
+
+            // Only add if title doesn't contain "separator" followed by any digits
+            if (!preg_match('/separator/i', trim($slug))) {  // Use preg_match for regex check
+                    $ace_admin_pages[$slug] = [
+                        'title' => $title,
+                        'capability' => $sub_menu_item[1],
+                    ];
+                }
+            }
+        }
+    }
+}
+
+add_action('admin_menu', 'ace_capture_admin_pages');
+
+// Render Login settings page
+
+function ace_login_block_render_settings_page() {
+    ?>
+    <div class="wrap">
+        <h1><?php _e('Ace Login Block Settings', 'ace-login-block'); ?></h1>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('ace_login_block_options_group');
+            do_settings_sections('ace_login_block');
+            ?>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row"><?php _e('Custom Login Page', 'ace-login-block'); ?></th>
+                    <td><?php ace_login_block_custom_page_field_html(); ?></td>
+                </tr>
+                <?php
+                // Get all WordPress roles
+                $roles = wp_roles()->roles;
+
+                // Get all public pages for front-end options
+                $front_end_pages = get_pages();
+
+                // Include the global admin pages array
+                global $ace_admin_pages;
+
+                foreach ($roles as $role => $details) {
+                    $redirect_url = get_option("ace_login_block_redirect_{$role}", '');
+                    ?>
+                    <tr valign="top">
+                        <th scope="row"><?php echo esc_html(ucfirst($role)); ?> <?php _e('Redirect URL', 'ace-login-block'); ?></th>
+                        <td>
+                            <label for="ace_login_block_redirect_<?php echo esc_attr($role); ?>">
+                                <select id="ace_login_block_redirect_<?php echo esc_attr($role); ?>" name="ace_login_block_redirect_<?php echo esc_attr($role); ?>">
+                                    <option value=""><?php _e('Default behaviour', 'ace-login-block'); ?></option>
+                                    
+                                    <!-- Frontend Pages Header -->
+                                    <option disabled><?php _e('--- Frontend Pages ---', 'ace-login-block'); ?></option>
+                                    <?php
+                                    // Front-end pages options
+                                    foreach ($front_end_pages as $page) : ?>
+                                        <option value="<?php echo esc_attr(get_permalink($page->ID)); ?>" <?php selected(esc_url($redirect_url), get_permalink($page->ID)); ?>>
+                                            <?php echo esc_html($page->post_title); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                    
+                                    <!-- Admin Pages Header -->
+                                    <option disabled><?php _e('--- Admin Pages ---', 'ace-login-block'); ?></option>
+                                    <?php 
+                                    // Admin pages options
+                                    foreach ($ace_admin_pages as $page => $info) {
+                                        // Check if the role has the capability to access the page
+                                        if (user_can(get_role($role), $info['capability'])) {
+                                            // Construct the full admin URL
+                                            $admin_url = admin_url($page);
+                                            ?>
+                                            <option value="<?php echo esc_attr($admin_url); ?>" <?php selected(esc_url($redirect_url), $admin_url); ?>>
+                                                <?php echo esc_html($info['title']); ?>
+                                            </option>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </label>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+}
+
+
+
+
+
 
 /**
- * Display the dropdown to select the login page in the General Settings.
+ * Display the dropdown to select the login page in the Ace Login Block settings page.
  */
 function ace_login_block_custom_page_field_html() {
     $custom_page_id = get_option( 'ace_login_block_custom_page', 0 );
@@ -143,14 +306,31 @@ function ace_login_block_login_enqueue_assets() {
 add_action( 'wp_enqueue_scripts', 'ace_login_block_login_enqueue_assets' );
 
 
-
+// Handle the login redirect after a user logs in
+// Handle the login redirect after a user logs in
 add_action('wp_login', 'custom_login_redirect', 10, 2);
 function custom_login_redirect($user_login, $user) {
-    if (isset($_POST['redirect_to']) && !empty($_POST['redirect_to'])) {
-        wp_safe_redirect($_POST['redirect_to']);
-        exit();
+    // Initialize the redirect URL with the default redirect if set
+    $redirect_url = isset($_POST['redirect_to']) ? esc_url($_POST['redirect_to']) : admin_url(); // Use admin_url() as default
+
+    // Check for role-specific redirects
+    foreach ($user->roles as $role) {
+        $role_redirect_key = "ace_login_block_redirect_{$role}"; // Adjust the option key
+        $role_redirect_url = get_option($role_redirect_key);
+
+        // If a role-specific redirect URL is found, use it
+        if (!empty($role_redirect_url)) {
+            $redirect_url = esc_url($role_redirect_url); // Use the full URL directly
+            break; // Break after finding the first applicable redirect
+        }
     }
+
+    // Perform the redirect
+    wp_safe_redirect($redirect_url);
+    exit(); // Exit to ensure no further processing occurs
 }
+
+
 
 add_action('wp_logout', 'custom_logout_redirect');
 function custom_logout_redirect() {
@@ -203,11 +383,11 @@ function ace_login_block_enqueue_assets() {
         true
     );
 
-    // Localize script to pass the site URL and nonce to JavaScript
     wp_localize_script('ace-login-block-editor', 'aceLoginBlock', array(
         'loginUrl' => site_url('wp-login.php'),
         'redirectUrl' => site_url('/wp-admin'),
-        'loginNonce' => wp_create_nonce('login_nonce')
+        'loginNonce' => wp_create_nonce('login_nonce'),
+        'userRoles' => wp_get_current_user()->roles, // Pass the current user roles
     ));
 
     wp_enqueue_script(
@@ -340,3 +520,18 @@ function render_remember_me_block($attributes) {
     return '<p><label><input type="checkbox" name="rememberme" ' . $checked . ' /> ' . $label . '</label></p>';
 }
 
+/**
+ * Redirect users based on their role after login.
+ */
+function ace_login_block_redirect_after_login( $redirect_to, $request, $user ) {
+    if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+        foreach ( $user->roles as $role ) {
+            $redirect_url = get_option( "ace_login_block_redirect_{$role}" );
+            if ( ! empty( $redirect_url ) ) {
+                return esc_url( $redirect_url );
+            }
+        }
+    }
+    return $redirect_to; // Default behavior if no redirect URL is set
+}
+//add_filter( 'login_redirect', 'ace_login_block_redirect_after_login', 10, 3 );

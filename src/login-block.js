@@ -15,10 +15,6 @@ registerBlockType('ace/login-block', {
     icon: 'lock',
     category: 'common',
     attributes: {
-        redirectUrl: {
-            type: 'string',
-            default: '', // Optional override for redirect URL
-        },
         labelRemember: {
             type: 'string',
             default: __('Remember Me', 'login-block'),
@@ -30,7 +26,7 @@ registerBlockType('ace/login-block', {
     },
 
     edit: ({ attributes, setAttributes }) => {
-        const { redirectUrl, labelRemember, labelLogIn } = attributes;
+        const { labelRemember, labelLogIn } = attributes;
 
         // Template for inner blocks
         const TEMPLATE = [
@@ -59,7 +55,6 @@ registerBlockType('ace/login-block', {
                         ['core/button', {
                             text: labelLogIn,
                             className: 'button',
-                            ...attributes
                         }]
                     ]]
                 ]],
@@ -70,12 +65,7 @@ registerBlockType('ace/login-block', {
             <div {...useBlockProps()}>
                 <InspectorControls>
                     <PanelBody title={__('Login Form Settings', 'login-block')}>
-                        <TextControl
-                            label={__('Redirect URL', 'login-block')}
-                            value={redirectUrl}
-                            onChange={(value) => setAttributes({ redirectUrl: value })}
-                            help={__('Leave blank to use WordPress default behavior or provide a custom URL to override.', 'login-block')}
-                        />
+                        {/* Removed the TextControl for redirect URL */}
                     </PanelBody>
                 </InspectorControls>
 
@@ -86,17 +76,12 @@ registerBlockType('ace/login-block', {
         );
     },
 
-    save: ({ attributes }) => {
-        const { redirectUrl } = attributes;
-        const defaultRedirectUrl = redirectUrl || '/wp-admin';
-
-        return (
-            <div className="wp-block-login-form">
-                <form action={aceLoginBlock.loginUrl} method="post">
-                    <InnerBlocks.Content />
-                    <input type="hidden" name="redirect_to" value={defaultRedirectUrl} />
-                </form>
-            </div>
-        );
-    },
+    save: () => (
+        <div className="wp-block-login-form">
+            <form action={aceLoginBlock.loginUrl} method="post">
+                <InnerBlocks.Content />
+                <button type="submit" style={{ display: 'none' }}>Submit</button>
+            </form>
+        </div>
+    ),
 });
