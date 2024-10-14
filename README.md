@@ -4,6 +4,8 @@
 **Tags:** login, block, custom login, WordPress, Gutenberg, security  
 **Tested up to:** 6.6  
 **Stable tag:** 1.0.0  
+**License:** GPLv2 or later  
+**License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
 Customize your WordPress login page with a fully-integrated Gutenberg block, giving you complete control over the design and functionality.
 
@@ -53,12 +55,42 @@ If you disable Ace Login Block, WordPress will revert to the default `wp-login.p
 
 ## Changelog
 
-### 1.0.0
-- Initial release of Ace Login Block.
-- Replace default WordPress login page with a custom page created in the block editor.
-- Full block editor support for designing custom login pages.
-- Ensure POST requests for login are still handled by WordPress.
-- Support for custom login redirects.
+### 0.423
+**Release Date:** 2024-10-12
+- New Feature: Implemented dynamic login redirects based on user roles, allowing specific redirect URLs for each role within the settings.
+- Enhancement: Updated `ace-login-block.php` to handle dynamic redirects, ensuring users are sent to the appropriate page after logging in based on their role.
+- Enhancement: Modified `package-lock.json` and `package.json` to include new dependencies required for the updated functionality.
+- Enhancement: Enhanced `src/block.json` to support role-based page listings, making it easier to manage page options for each role.
+- Enhancement: Updated `src/login-block.js` to dynamically list available pages per role, improving the settings interface for selecting redirect URLs.
+- **Important Note:** Ensure that roles are properly configured in the WordPress admin to utilize the dynamic redirect feature effectively.
+
+### 0.422
+**Release Date:** 2024-10-12
+- New Feature: Introduced a custom login block structure to fully control the layout of the form using native block interactions.
+- New Feature: Added new blocks for the username and password input fields.
+- Enhancement: Dynamic form action URL is now set using localized data from PHP.
+- Enhancement: Added nonce handling to the login form for improved security.
+- Enhancement: Improved reliability of redirect handling after login.
+- Bug Fix: Resolved an issue with form submission not being detected as a POST request.
+- Bug Fix: Fixed redirection issues caused by interception from the custom page template.
+- Bug Fix: Improved logout handling to ensure users are correctly redirected after logging out.
+- **Important Note:** Ensure the logout link includes the correct `action=logout` parameter and nonce.
+
+### 0.421
+**Release Date:** 2024-10-11
+- Bug Fix: Resolved issues with form redirection that affected login functionality in v0.420.
+- Enhancement: Added a new option to allow users to show the "Show Password" toggle in the login block.
+
+### 0.420 (Pre-Release)
+**Release Date:** 2024-10-11
+- Initial Release: First release of the Ace Login Block plugin.
+- Key Features:
+  - Custom Login Page: Replace the default `wp-login.php` form with a page created in the block editor.
+  - Post Request Handling: Securely handles login form submissions.
+  - Seamless Template Loading: Automatically loads the selected custom page template.
+  - Block Editor Integration: Customize your login page using blocks.
+  - Debugging: Debug messages included to assist with development.
+- **Important Note:** Known issues with form redirection in this version, recommended to use v0.421 for better performance.
 
 ## Advanced Use
 
