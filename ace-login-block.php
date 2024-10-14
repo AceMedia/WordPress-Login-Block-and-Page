@@ -3,13 +3,13 @@
  * Plugin Name:       Ace Login Block
  * Description:       A block to replace the WordPress login page using a custom page and its template from the site editor.
  * Requires at least: 6.6
+ * Tested up to:      6.7
  * Requires PHP:      7.2
  * Version:           0.423.0
  * Author:            Shane Rounce
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       ace-login-block
- * Tested up to:      6.7
+ * Text Domain:       WordPress-Login-Block-and-Page
  * @package AceLoginBlock
  */
 
@@ -34,7 +34,7 @@ function ace_login_block_register_settings() {
     // Register the custom login page setting
     register_setting( 'ace_login_block_options_group', 'ace_login_block_custom_page', [
         'type' => 'integer',
-        'description' => __( 'Custom page for login', 'ace-login-block' ),
+    'description' => __( 'Custom page for login', 'WordPress-Login-Block-and-Page' ),
         'sanitize_callback' => 'absint',
         'default' => 0,
     ] );
@@ -44,7 +44,8 @@ function ace_login_block_register_settings() {
     foreach ( $roles as $role => $details ) {
         register_setting( 'ace_login_block_options_group', "ace_login_block_redirect_{$role}", [
             'type' => 'string',
-            'description' => __( "Redirect URL for {$role}", 'ace-login-block' ),
+            // Translators: %s is the role name
+            'description' => sprintf( __( 'Redirect URL for %s', 'WordPress-Login-Block-and-Page' ), $role ),
             'sanitize_callback' => 'esc_url_raw',
             'default' => '',
         ] );
@@ -52,10 +53,10 @@ function ace_login_block_register_settings() {
 
     // Add the settings page
     add_options_page(
-        __( 'Login Settings', 'ace-login-block' ),
-        __( 'Login Block', 'ace-login-block' ),
+        __( 'Login Settings', 'WordPress-Login-Block-and-Page' ),
+        __( 'Login Block', 'WordPress-Login-Block-and-Page' ),
         'manage_options',
-        'ace-login-block',
+        'WordPress-Login-Block-and-Page',
         'ace_login_block_render_settings_page'
     );
 }
@@ -69,7 +70,7 @@ $ace_admin_pages = [];
 function remove_spans_and_content($title) {
     // Remove <span> tags and their content
     $cleaned_title = preg_replace('/<span[^>]*>.*?<\/span>/i', '', $title);
-    $cleaned_title = strip_tags($cleaned_title);
+    $cleaned_title = wp_strip_all_tags($cleaned_title);
     
     // Trim the title to remove any leading/trailing whitespace
     return trim($cleaned_title);
@@ -128,7 +129,7 @@ add_action('admin_menu', 'ace_capture_admin_pages');
 function ace_login_block_render_settings_page() {
     ?>
     <div class="wrap">
-        <h1><?php _e('Ace Login Block Settings', 'ace-login-block'); ?></h1>
+        <h1><?php esc_html_e('Ace Login Block Settings', 'WordPress-Login-Block-and-Page'); ?></h1>
         <form method="post" action="options.php">
             <?php
             settings_fields('ace_login_block_options_group');
@@ -136,7 +137,7 @@ function ace_login_block_render_settings_page() {
             ?>
             <table class="form-table">
                 <tr valign="top">
-                    <th scope="row"><?php _e('Custom Login Page', 'ace-login-block'); ?></th>
+                    <th scope="row"><?php esc_html_e('Custom Login Page', 'WordPress-Login-Block-and-Page'); ?></th>
                     <td><?php ace_login_block_custom_page_field_html(); ?></td>
                 </tr>
                 <?php
@@ -153,14 +154,14 @@ function ace_login_block_render_settings_page() {
                     $redirect_url = get_option("ace_login_block_redirect_{$role}", '');
                     ?>
                     <tr valign="top">
-                        <th scope="row"><?php echo esc_html(ucfirst($role)); ?> <?php _e('Redirect URL', 'ace-login-block'); ?></th>
+                        <th scope="row"><?php echo esc_html(ucfirst($role)); ?> <?php esc_html_e('Redirect URL', 'WordPress-Login-Block-and-Page'); ?></th>
                         <td>
                             <label for="ace_login_block_redirect_<?php echo esc_attr($role); ?>">
                                 <select id="ace_login_block_redirect_<?php echo esc_attr($role); ?>" name="ace_login_block_redirect_<?php echo esc_attr($role); ?>">
-                                    <option value=""><?php _e('Default behaviour', 'ace-login-block'); ?></option>
+                                    <option value=""><?php esc_html_e('Default behaviour', 'WordPress-Login-Block-and-Page'); ?></option>
                                     
                                     <!-- Frontend Pages Header -->
-                                    <option disabled><?php _e('--- Frontend Pages ---', 'ace-login-block'); ?></option>
+                                    <option disabled><?php esc_html_e('--- Frontend Pages ---', 'WordPress-Login-Block-and-Page'); ?></option>
                                     <?php
                                     // Front-end pages options
                                     foreach ($front_end_pages as $page) : ?>
@@ -170,7 +171,7 @@ function ace_login_block_render_settings_page() {
                                     <?php endforeach; ?>
                                     
                                     <!-- Admin Pages Header -->
-                                    <option disabled><?php _e('--- Admin Pages ---', 'ace-login-block'); ?></option>
+                                    <option disabled><?php esc_html_e('--- Admin Pages ---', 'WordPress-Login-Block-and-Page'); ?></option>
                                     <?php 
                                     // Admin pages options
                                     foreach ($ace_admin_pages as $page => $info) {
@@ -213,11 +214,11 @@ function ace_login_block_custom_page_field_html() {
     $pages = get_pages();
 
     echo '<select name="ace_login_block_custom_page">';
-    echo '<option value="">' . esc_html__( 'Select a page', 'ace-login-block' ) . '</option>';
+    echo '<option value="">' . esc_html__( 'Select a page', 'WordPress-Login-Block-and-Page' ) . '</option>';
 
     foreach ( $pages as $page ) {
         $selected = selected( $custom_page_id, $page->ID, false );
-        echo '<option value="' . esc_attr( $page->ID ) . '" ' . $selected . '>' . esc_html( $page->post_title ) . '</option>';
+        echo '<option value="' . esc_attr( $page->ID ) . '" ' . esc_attr( $selected ) . '>' . esc_html( $page->post_title ) . '</option>';
     }
 
     echo '</select>';
@@ -232,36 +233,40 @@ function ace_login_block_load_custom_page_template() {
 
 
     // Check if we're on wp-login.php and a custom page is set
-    if ( strpos( $_SERVER['REQUEST_URI'], 'wp-login.php' ) !== false && $custom_page_id ) {
-        
-        // If the request method is POST, let WordPress handle the login process
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            return; // Let WordPress handle the login submission
-        }
+    if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+        $request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+        if ( strpos( $request_uri, 'wp-login.php' ) !== false && $custom_page_id ) {
+    
+            
+            // If the request method is POST, let WordPress handle the login process
+            if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'POST' ) {
+                return; // Let WordPress handle the login submission
+            }
 
-        // Fetch the template for the chosen page
-        $page_template = get_page_template_slug( $custom_page_id );
+            // Fetch the template for the chosen page
+            $page_template = get_page_template_slug( $custom_page_id );
 
-        // If no custom template is found, use the default page template
-        if ( ! empty( $page_template ) && locate_template( $page_template ) ) {
-            $template_path = locate_template( $page_template );
-        } else {
-            $template_path = get_page_template();
-        }
+            // If no custom template is found, use the default page template
+            if ( ! empty( $page_template ) && locate_template( $page_template ) ) {
+                $template_path = locate_template( $page_template );
+            } else {
+                $template_path = get_page_template();
+            }
 
-        if ( ! empty( $template_path ) ) {
-            // Set up the global post data for the custom page
-            global $wp_query, $post;
-            $post = get_post( $custom_page_id );
-            setup_postdata( $post );
+            if ( ! empty( $template_path ) ) {
+                // Set up the global post data for the custom page
+                global $wp_query, $post;
+                $post = get_post( $custom_page_id );
+                setup_postdata( $post );
 
-            // Load the custom page template
-            include $template_path;
+                // Load the custom page template
+                include $template_path;
 
-            // Prevent further execution after the template is loaded
-            exit;
-        } else {
-            wp_die( __( 'Template not found for the login page.', 'ace-login-block' ) );
+                // Prevent further execution after the template is loaded
+                exit;
+            } else {
+                wp_die( esc_html__( 'Template not found for the login page.', 'WordPress-Login-Block-and-Page' ) );
+                    }
         }
     }
 }
@@ -293,19 +298,24 @@ function ace_login_block_login_enqueue_assets() {
     // Localize script to pass the site URL and nonce to JavaScript
     wp_localize_script('ace-login-block-js', 'aceLoginBlock', array(
         'loginUrl' => site_url('wp-login.php'),
-        'redirectUrl' => site_url('/wp-admin'),
-        'loginNonce' => wp_create_nonce('login_nonce')
+        'redirectUrl' => site_url('/wp-admin')
     ));
 }
 add_action( 'wp_enqueue_scripts', 'ace_login_block_login_enqueue_assets' );
 
 
 // Handle the login redirect after a user logs in
-// Handle the login redirect after a user logs in
 add_action('wp_login', 'custom_login_redirect', 10, 2);
 function custom_login_redirect($user_login, $user) {
     // Initialize the redirect URL with the default redirect if set
-    $redirect_url = isset($_POST['redirect_to']) ? esc_url($_POST['redirect_to']) : admin_url(); // Use admin_url() as default
+    if ( isset( $_POST['login_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['login_nonce'] ) ), 'login_action' ) ) {
+        // The nonce is valid, process the form data
+        $redirect_url = isset( $_POST['redirect_to'] ) ? esc_url( sanitize_text_field( wp_unslash( $_POST['redirect_to'] ) ) ) : admin_url();
+    } else {
+        // The nonce check failed, handle the error
+        wp_die( esc_html__( 'Security check failed.', 'WordPress-Login-Block-and-Page' ) );
+    }
+
 
     // Check for role-specific redirects
     foreach ($user->roles as $role) {
@@ -337,7 +347,7 @@ add_action('init', 'custom_handle_logout');
 function custom_handle_logout() {
     if (isset($_GET['action']) && $_GET['action'] === 'logout') {
         // Verify the nonce
-        if (isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'log-out')) {
+        if (isset($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'log-out')) {
             // Perform the logout
             wp_logout();
 
@@ -353,7 +363,7 @@ function custom_handle_logout() {
  * Customize the login page title.
  */
 function ace_login_block_login_title( $title ) {
-    return __( 'Login', 'ace-login-block' );
+    return __( 'Login', 'WordPress-Login-Block-and-Page' );
 }
 add_filter( 'login_title', 'ace_login_block_login_title' );
 
@@ -426,11 +436,11 @@ function register_username_block() {
         'attributes' => array(
             'label' => array(
                 'type' => 'string',
-                'default' => __('Username', 'login-block'),
+                'default' => __('Username', 'WordPress-Login-Block-and-Page'),
             ),
             'placeholder' => array(
                 'type' => 'string',
-                'default' => __('Username', 'login-block'),
+                'default' => __('Username', 'WordPress-Login-Block-and-Page'),
             ),
         ),
     ));
@@ -445,7 +455,7 @@ add_action('init', 'register_username_block');
  */
 function render_username_block($attributes) {
     // Ensure the placeholder is properly sanitized
-    $placeholder = isset($attributes['placeholder']) ? sanitize_text_field($attributes['placeholder']) : __('Username', 'login-block');
+    $placeholder = isset($attributes['placeholder']) ? sanitize_text_field($attributes['placeholder']) : __('Username', 'WordPress-Login-Block-and-Page');
 
     // Escape the placeholder for safe HTML output
     $placeholder = esc_attr($placeholder);
@@ -463,7 +473,7 @@ function register_password_block() {
         'attributes' => array(
             'label' => array(
                 'type' => 'string',
-                'default' => __('Password', 'login-block'),
+                'default' => __('Password', 'WordPress-Login-Block-and-Page'),
             ),
             'showPassword' => array(
                 'type' => 'boolean',
@@ -482,7 +492,7 @@ add_action('init', 'register_password_block');
  */
 function render_password_block($attributes) {
     // Ensure the placeholder is properly sanitized
-    $placeholder = isset($attributes['placeholder']) ? sanitize_text_field($attributes['placeholder']) : __('Password', 'login-block');
+    $placeholder = isset($attributes['placeholder']) ? sanitize_text_field($attributes['placeholder']) : __('Password', 'WordPress-Login-Block-and-Page');
 
     // Escape the placeholder for safe HTML output
     $placeholder = esc_attr($placeholder);
@@ -490,16 +500,23 @@ function render_password_block($attributes) {
     // Ensure the showPassword attribute is boolean and safe for use in HTML attributes
     $show_password = !empty($attributes['showPassword']) ? 'true' : 'false';
 
+    // Generate a nonce field for the login form
+    $login_nonce = wp_create_nonce('login_action');
+
     // Start building the HTML for the password input
     $html = '<input type="password" id="pwd" name="pwd" placeholder="' . $placeholder . '" required />';
 
+    // Add the hidden login_nonce field
+    $html .= '<input type="hidden" name="login_nonce" value="' . esc_attr($login_nonce) . '" />';
+
     // Conditionally add the "Show Password" toggle if enabled
     if ($attributes['showPassword']) {
-        $html .= '<span style="cursor:pointer" data-show-password="' . esc_attr($show_password) . '">' . esc_html__('Show Password', 'login-block') . '</span>';
+        $html .= '<span style="cursor:pointer" data-show-password="' . esc_attr($show_password) . '">' . esc_html__('Show Password', 'WordPress-Login-Block-and-Page') . '</span>';
     }
 
     return $html;
 }
+
 
 
 
@@ -513,7 +530,7 @@ function register_remember_me_block() {
         'attributes' => array(
             'label' => array(
                 'type' => 'string',
-                'default' => __('Remember Me', 'login-block'),
+                'default' => __('Remember Me', 'WordPress-Login-Block-and-Page'),
             ),
             'checked' => array(
                 'type' => 'boolean',

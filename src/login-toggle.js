@@ -31,12 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set the form action dynamically
         loginForm.action = aceLoginBlock.loginUrl;
 
-        // Create a hidden input field for the nonce
-        const nonceInput = document.createElement('input');
-        nonceInput.type = 'hidden';
-        nonceInput.name = 'login_nonce';
-        nonceInput.value = aceLoginBlock.loginNonce;
-        loginForm.appendChild(nonceInput);
 
         // Ensure the redirect_to field is present and has the correct value
         let redirectInput = loginForm.querySelector('input[name="redirect_to"]');
