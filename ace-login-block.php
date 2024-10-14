@@ -90,9 +90,6 @@ function ace_capture_admin_pages() {
         // Add to the admin pages array if it has a capability and a title
         if (!empty($slug) && isset($menu_item[0]) && isset($menu_item[1])) {
             $title = remove_spans_and_content($menu_item[0]); // Remove <span> tags and their content
-            
-            // Debug: Log the title
-            error_log('Top-level Menu Title: ' . $title);
 
             // Only add if title doesn't contain "separator" followed by any digits
             if (!preg_match('/separator/i', trim($slug))) { // Use preg_match for regex check
@@ -111,9 +108,6 @@ function ace_capture_admin_pages() {
             $slug = isset($sub_menu_item[2]) ? $sub_menu_item[2] : '';
             if (!empty($slug) && isset($sub_menu_item[0]) && isset($sub_menu_item[1])) {
                 $title = remove_spans_and_content($sub_menu_item[0]); // Remove <span> tags and their content
-
-                // Debug: Log the title
-                error_log('Sub-menu Title: ' . $title);
 
             // Only add if title doesn't contain "separator" followed by any digits
             if (!preg_match('/separator/i', trim($slug))) {  // Use preg_match for regex check
@@ -445,10 +439,18 @@ add_action('init', 'register_username_block');
 
 /**
  * Renders the Ace Username Block.
+ *
+ * @param array $attributes Block attributes.
+ * @return string The HTML output for the username block.
  */
 function render_username_block($attributes) {
-    $placeholder = isset($attributes['placeholder']) ? esc_html($attributes['placeholder']) : __('Username', 'login-block');
+    // Ensure the placeholder is properly sanitized
+    $placeholder = isset($attributes['placeholder']) ? sanitize_text_field($attributes['placeholder']) : __('Username', 'login-block');
+
+    // Escape the placeholder for safe HTML output
+    $placeholder = esc_attr($placeholder);
     
+    // Return the sanitized and escaped input field
     return '<input type="text" id="log" name="log" placeholder="' . $placeholder . '" required />';
 }
 
@@ -474,20 +476,31 @@ add_action('init', 'register_password_block');
 
 /**
  * Renders the Ace Password Block.
+ *
+ * @param array $attributes Block attributes.
+ * @return string The HTML output for the password block.
  */
 function render_password_block($attributes) {
-    $show_password = $attributes['showPassword'] ? 'true' : 'false';
-    $placeholder = isset($attributes['placeholder']) ? esc_html($attributes['placeholder']) : __('Password', 'login-block');
-    
-    
+    // Ensure the placeholder is properly sanitized
+    $placeholder = isset($attributes['placeholder']) ? sanitize_text_field($attributes['placeholder']) : __('Password', 'login-block');
+
+    // Escape the placeholder for safe HTML output
+    $placeholder = esc_attr($placeholder);
+
+    // Ensure the showPassword attribute is boolean and safe for use in HTML attributes
+    $show_password = !empty($attributes['showPassword']) ? 'true' : 'false';
+
+    // Start building the HTML for the password input
     $html = '<input type="password" id="pwd" name="pwd" placeholder="' . $placeholder . '" required />';
-    
+
+    // Conditionally add the "Show Password" toggle if enabled
     if ($attributes['showPassword']) {
-        $html .= '<span style="cursor:pointer" data-show-password="' . $show_password . '">' . __('Show Password', 'login-block') . '</span>';
+        $html .= '<span style="cursor:pointer" data-show-password="' . esc_attr($show_password) . '">' . esc_html__('Show Password', 'login-block') . '</span>';
     }
-        
+
     return $html;
 }
+
 
 
 
@@ -519,19 +532,3 @@ function render_remember_me_block($attributes) {
     $checked = $attributes['checked'] ? 'checked' : '';
     return '<p><label><input type="checkbox" name="rememberme" ' . $checked . ' /> ' . $label . '</label></p>';
 }
-
-/**
- * Redirect users based on their role after login.
- */
-function ace_login_block_redirect_after_login( $redirect_to, $request, $user ) {
-    if ( isset( $user->roles ) && is_array( $user->roles ) ) {
-        foreach ( $user->roles as $role ) {
-            $redirect_url = get_option( "ace_login_block_redirect_{$role}" );
-            if ( ! empty( $redirect_url ) ) {
-                return esc_url( $redirect_url );
-            }
-        }
-    }
-    return $redirect_to; // Default behavior if no redirect URL is set
-}
-//add_filter( 'login_redirect', 'ace_login_block_redirect_after_login', 10, 3 );
