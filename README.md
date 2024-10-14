@@ -2,8 +2,9 @@
 
 **Contributors:** Shane Rounce of AceMedia.ninja  
 **Tags:** login, block, custom login, WordPress, Gutenberg, security  
-**Tested up to:** 6.6  
-**Stable tag:** 1.0.0  
+**Requires at least:** 6.3 
+**Tested up to:** 6.7  
+**Stable tag:** 0.423.0  
 **License:** GPLv2 or later  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
